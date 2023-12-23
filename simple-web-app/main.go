@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +27,9 @@ var books = []Book{
 func main() {
 	router := gin.Default()
 
+	// Middleware
+	router.Use(LoggerMiddleWare)
+
 	// Menampilkan semua buku
 	router.GET("/books", getAllBooks)
 
@@ -44,6 +49,7 @@ func main() {
 }
 
 func getAllBooks(c *gin.Context) {
+	fmt.Println("Get all books")
 	// without query param
 	// c.JSON(http.StatusOK, books)
 
@@ -137,4 +143,17 @@ func updateBookById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
+}
+
+func CustomMiddleware(c *gin.Context) {
+	fmt.Println("Lewat CustomMiddleware . . .")
+	c.Next()
+	fmt.Println("Response Lewat CustomMiddleware")
+}
+
+func LoggerMiddleWare(c *gin.Context) {
+	start := time.Now()
+	c.Next()
+	elapsed := time.Since(start).Microseconds()
+	fmt.Println("Request memakan waktu sekitar", elapsed, "micro detik")
 }
