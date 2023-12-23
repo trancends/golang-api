@@ -44,7 +44,29 @@ func main() {
 }
 
 func getAllBooks(c *gin.Context) {
-	c.JSON(http.StatusOK, books)
+	// without query param
+	// c.JSON(http.StatusOK, books)
+
+	title := c.Query("title")
+
+	if title == "" {
+		c.JSON(http.StatusOK, books)
+		return
+	}
+
+	var matchedBooks []Book
+
+	for _, book := range books {
+		if strings.Contains(strings.ToLower(book.Title), strings.ToLower(title)) {
+			matchedBooks = append(matchedBooks, book)
+		}
+	}
+
+	if len(matchedBooks) > 0 {
+		c.JSON(http.StatusOK, matchedBooks)
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"error": "book not found"})
+	}
 }
 
 func createBook(c *gin.Context) {
