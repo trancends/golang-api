@@ -10,6 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type User struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
 type Book struct {
 	Id          int    `json:"id"`
 	Title       string `json:"title"`
@@ -24,28 +30,53 @@ var books = []Book{
 	{Id: 3, Title: "Dilan", Author: "Pidi Baiq", ReleaseYear: "2014"},
 }
 
+var users = []User{
+	{Id: 1, Name: "Benedictus", Age: 23},
+	{Id: 2, Name: "Jullian", Age: 23},
+}
+
 func main() {
 	router := gin.Default()
-
-	// Middleware
 	router.Use(LoggerMiddleWare)
 
-	// Menampilkan semua buku
-	router.GET("/books", getAllBooks)
+	apiGroup := router.Group("/api")
+	{
 
-	// Menambahkan buku
-	router.POST("/books/create", createBook)
+		booksGroup := apiGroup.Group("/books")
+		{
+			booksGroup.GET("/", getAllBooks)
+			booksGroup.POST("/", createBook)
+			booksGroup.GET("/:id", getBookById)
+			booksGroup.PUT("/:id", updateBookById)
+		}
+	}
 
-	// Menampilhkan detail buku
-	router.GET("/books/:id", getBookById)
+	usersGroup := router.Group("/users", getAllUsers)
+	usersGroup.GET("/")
 
-	// Update buku
-	router.PUT("/books/:id", updateBookById)
+	// Middleware
+	// router.Use(LoggerMiddleWare)
+	//
+	// // Menampilkan semua buku
+	// router.GET("/books", getAllBooks)
+	//
+	// // Menambahkan buku
+	// router.POST("/books/create", createBook)
+	//
+	// // Menampilhkan detail buku
+	// router.GET("/books/:id", getBookById)
+	//
+	// // Update buku
+	// router.PUT("/books/:id", updateBookById)
 
 	err := router.Run(":8080")
 	if err != nil {
 		panic(err)
 	}
+}
+
+func getAllUsers(c *gin.Context) {
+	c.JSON(http.StatusOK, users)
 }
 
 func getAllBooks(c *gin.Context) {
