@@ -23,7 +23,11 @@ var books = []Book{
 func main() {
 	router := gin.Default()
 
+	// Menampilkan semua buku
 	router.GET("/books", getAllBooks)
+
+	// Menambahkan buku
+	router.POST("/books/create", createBook)
 
 	err := router.Run(":8080")
 	if err != nil {
@@ -33,4 +37,17 @@ func main() {
 
 func getAllBooks(c *gin.Context) {
 	c.JSON(http.StatusOK, books)
+}
+
+func createBook(c *gin.Context) {
+	var newBook Book
+	// read body request and do deserialization
+	err := c.ShouldBind(&newBook)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	books = append(books, newBook)
+	c.JSON(http.StatusCreated, newBook)
 }
